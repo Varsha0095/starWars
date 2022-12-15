@@ -21,7 +21,7 @@ function App() {
       }
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
 
       const transformedMovies = data.results.map((movieData) => {
         return {
@@ -43,16 +43,19 @@ function App() {
   }, [fetchMoviesHandler]);
 
   async function addMovieHandler(movie) {
-    
-    const response = await fetch("https://react-http-1e4da-default-rtdb.firebaseio.com/movies.json", {
-      method: "POST",
-      body: JSON.stringify(movie),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    console.log(data);
+    console.log(`id = ${movie.id},
+    title = ${movie.title} ,
+    openingText = ${movie.openingText},
+    releaseDate = ${movie.releaseDate}`);
+    // const response = await fetch("https://react-http-1e4da-default-rtdb.firebaseio.com/movies.json", {
+    //   method: "POST",
+    //   body: JSON.stringify(movie),
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
+    // const data = await response.json();
+    // console.log(data);
   }
 
   let content = <p>Found no movies.</p>;
