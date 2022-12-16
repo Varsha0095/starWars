@@ -23,15 +23,17 @@ function App() {
       const data = await response.json();
       // console.log(data);
 
-      const transformedMovies = data.results.map((movieData) => {
-        return {
-          id: movieData.episode_id,
-          title: movieData.title,
-          openingText: movieData.opening_crawl,
-          releaseDate: movieData.release_date,
-        };
-      });
-      setMovies(transformedMovies);
+      const loadedMovies = [];
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+
+      setMovies(loadedMovies);
     } catch (error) {
       setError(error.message);
     }
@@ -42,21 +44,75 @@ function App() {
     fetchMoviesHandler();
   }, [fetchMoviesHandler]);
 
-  async function addMovieHandler(movie) {
-    console.log(`id = ${movie.id},
-    title = ${movie.title} ,
-    openingText = ${movie.openingText},
-    releaseDate = ${movie.releaseDate}`);
-    // const response = await fetch("https://react-http-1e4da-default-rtdb.firebaseio.com/movies.json", {
-    //   method: "POST",
-    //   body: JSON.stringify(movie),
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-    // const data = await response.json();
-    // console.log(data);
-  }
+  const addMovieHandler = async (movie) => {
+    try {
+      const response = await fetch(
+        "https://react-http-1e4da-default-rtdb.firebaseio.com/movies.json",
+        {
+          method: "POST",
+          body: JSON.stringify(movie),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+      //fetching movie without loading and updating state
+      movie.id = data.name;
+      setMovies([...movies, movie]);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+  const deleteMovieHandler = useCallback(async (title) => {
+    let id;
+    let elementToBeDeleted;
+    console.log("movies before loop", movies);
+    for (let i = 0; i < movies.length; i++) {
+      if (movies[i].title === title) {
+        elementToBeDeleted = i;
+        id = movies[i].id;
+        break;
+      }
+    }
+    try {
+      console.log(id, 'to be deleted')
+      const response = await fetch(
+        `https://react-http-1e4da-default-rtdb.firebaseio.com/movies/${id}.json`,
+        {
+          method: "DELETE",
+          body: null,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // remove deleted element from movie array and update the state
+      movies.splice(elementToBeDeleted, 1);
+      setMovies([...movies]);
+    } catch (error) {
+      setError(error.message);
+    }
+  });
+
+  // const deleteMovieHandler = async (id) => {
+  //   try{ const response = await fetch(
+  //     `https://react-http-1e4da-default-rtdb.firebaseio.com/movies/${id}.json`,
+  //     {
+  //       method: "DELETE",
+  //       body: null,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     }
+  //   );
+  //   movies.splice(id, 1);
+  //   setMovies([...movies])
+  //   } catch(error){
+  //     setError(error.message);
+  //   } 
+  // };
 
   let content = <p>Found no movies.</p>;
 
@@ -75,7 +131,7 @@ function App() {
   return (
     <React.Fragment>
       <section>
-        <AddMovie onAddMovie={addMovieHandler} />
+        <AddMovie onAddMovie={addMovieHandler} onDeleteMovie={deleteMovieHandler} />
       </section>
       <section>
         <button onClick={fetchMoviesHandler}>Fetch Movies</button>

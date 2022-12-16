@@ -20,6 +20,10 @@ function AddMovie(props) {
 
     props.onAddMovie(movie);
   }
+  const deleteMovieHandler = (e) => {
+    e.preventDefault();
+    props.onDeleteMovie(titleRef.current.value);
+  };
 
   return (
     <form onSubmit={submitHandler}>
@@ -36,6 +40,7 @@ function AddMovie(props) {
         <input type='text' id='date' ref={releaseDateRef} />
       </div>
       <button>Add Movie</button>
+      <button onClick={deleteMovieHandler}>Delete Movie</button>
     </form>
   );
 }
